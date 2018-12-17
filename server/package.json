@@ -1,0 +1,19 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "server for fabelio",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ahmad Nizar",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "jsdom": "^13.1.0",
+    "mongoose": "^5.4.0",
+    "nodemon": "^1.18.9",
+    "puppeteer": "^1.11.0"
+  }
+}
