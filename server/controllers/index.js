@@ -7,8 +7,9 @@ class ProductCtrl {
     console.log('masuk cuk');
     
     puppeter
-      .launch()
+      .launch({args: ['--no-sandbox', '--disable-setuid-sandbox']})
       .then((browser) => {
+        console.log('masuk sini browser')
         return browser.newPage()
       })
       .then((page) => {
@@ -43,20 +44,33 @@ class ProductCtrl {
           })
 
           const newProductData = await tempProductData.save()
-
+          this.updateAllProduct()
           res.status(200).send(newProductData)
         } catch (error) {
           res.status(500).send(error)
         }
-
-        // console.log(tempProductName, tempProductPrice, tempDeskripsiBarang, newDeskripsiBarang, tempUrlProductImg)
-        // res.status(500).send('from controller 1')
       })
-    // console.log(req.body)
+      .catch(e => {
+        res.status(500).send('paling bawah', e)
+      })
   }
   static async getNewProduct(req, res) {
     try {
+      console.log(req.params);
+      
       let tempDataProduct = await ProductModel.find()
+      // this.updateAllProduct()
+      res.status(200).send(tempDataProduct)
+    } catch (error) {
+      res.status(500).send(error)
+    }
+  }
+  static async getProductById(req, res) {
+    try {
+      console.log('masuk sini gg sih?', req.params);
+      // this.updateAllProduct()
+      let tempDataProduct = await ProductModel.findById(req.params.id)
+
       res.status(200).send(tempDataProduct)
     } catch (error) {
       res.status(500).send(error)
@@ -69,6 +83,49 @@ class ProductCtrl {
       res.status(200).send(deletedData)
     } catch (error) {
       res.status(500).send(error)
+    }
+  }
+  static async updateAllProduct() {
+    try {
+      let tempDataProduct = await ProductModel.find()
+
+      tempDataProduct.forEach(async item => {
+        if(((new Date().getTime() - new Date(item.productPrice[item.productPrice.length -1].createdAt).getTime())/1000) >= 3600 ) {
+          try {
+            puppeter
+              .launch({args: ['--no-sandbox', '--disable-setuid-sandbox']})
+              .then((browser) => {
+                return browser.newPage()
+              })
+              .then((page) => {
+                return page.goto(item.productUrl)
+                .then(() => {
+                  return page.content()
+                })
+              })
+              .then( async html => {
+                let newHtml = new JSDOM(html)
+                let tempProductPrice = newHtml.window.document.getElementsByClassName('price')[0].innerHTML
+
+                try {
+                  item.productPrice.push({
+                    currentPrice: tempProductPrice, 
+                    createdAt: new Date()
+                  })
+                } catch (error) {
+                  console.log(error)
+                }
+              })
+              .catch(e => {
+                console.log('paling bawah', e)
+              })    
+            } catch (error) {
+            console.log(error)
+            }
+        }
+      })
+    } catch (error) {
+      console.error(error)
     }
   }
 }

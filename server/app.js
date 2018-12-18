@@ -1,7 +1,7 @@
 const express       = require('express')
 const app           = express()
 const mongoose      = require('mongoose')
-const port          = 3000
+const port          = process.env.PORT || 3000
 const productRouter = require('./Routes')
 require('dotenv').config()
 
@@ -14,6 +14,11 @@ mongoose.connect(`${mongoDBUrl}`, (err) => {
     console.log('TIDAK TERHUBUNG DATABASE',err);
   }
 })
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use('/product', productRouter)
